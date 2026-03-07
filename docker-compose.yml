@@ -1,0 +1,67 @@
+version: "3.7"
+services:
+  plate:
+    build: ./app
+    image: plate
+    expose:
+      - 660
+    volumes:
+      - ./app:/app
+    environment:
+      - APP_ROOT=/plate
+    command: uvicorn entry_point:app --workers 2 --host 0.0.0.0 --port 660
+
+  nginx:
+    build: ./nginx
+    image: nginx
+    restart: always
+    ports:
+      - "3002:82"
+    depends_on:
+      - plate
+
+  rabbitmq:
+    image: rabbitmq
+    # container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+
+  worker:
+    build: ./worker
+    image: worker
+    # container_name: worker
+    depends_on:
+      - rabbitmq
+      - plate
+    command: python receive.py
+
+  # در صورت نیاز به اجرای اسکریپت خودکار استریم (camera_capture.py)
+  camera:
+    build: ./worker
+    image: camera
+    # container_name: camera
+    depends_on:
+      - rabbitmq
+    environment:
+      - CAMERA_URL=rtsp://admin:$$adraPASS@192.168.50.150:554/
+    command: python camera_capture.py
+
+  # سرویس API کنترل دستی (برای ارسال تصویر، ویدیو یا استریم زنده)
+  camera_api:
+    build: ./worker
+    image: camera_api
+    # container_name: camera_api
+    ports:
+      - "5000:5000"
+    environment:
+      - CAMERA_URL=rtsp://admin:$$adraPASS@192.168.50.150:554/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_QUEUE=camera_frames
+      - PLATE_SERVICE_URL=http://plate:660/plate
+    command: uvicorn camera_api:app --host 0.0.0.0 --port 5000
+    depends_on:
+      - rabbitmq

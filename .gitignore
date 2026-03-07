@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+yolov5/
+
+# Outputs & Databases
+output/
+cropped-plate/
+original-plate/
+*.db
+*.sqlite
+
+# Large files & Archives
+*.tar
+*.zip
+camera_api.tar
+camera.tar
+nginx.tar
+plate-stream.tar.xz
+plate.tar
+rabbitmq.tar
+worker.tar
+
+# Samples (Videos)
+sample/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
