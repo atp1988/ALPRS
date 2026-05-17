@@ -70,29 +70,17 @@ docker compose up -d --build
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/health` | Service health check |
-| `POST` | `/start_stream` | Start processing an RTSP stream |
-| `POST` | `/stop_stream` | Stop a running stream |
-| `GET` | `/latest` | Get the most recently read plate |
-| `GET` | `/history` | Get recent plate readings |
-| `POST` | `/predict` | Run single-image plate recognition |
+| `GET` | `/plate` | Service health check — returns `{"Just": "Fine!"}` |
+| `POST` | `/plate` | Run plate recognition on a base64-encoded image |
 
-### Example: Start a Stream
+> Default route is `/plate` (configurable via `APP_ROOT` env var). Service runs on port `3002` by default (`PORT_NUMBER` env var).
+
+### Example: Recognize Plate from Base64 Image
 
 ```bash
-curl -X POST http://localhost:8000/start_stream \
+curl -X POST http://localhost:3002/plate \
   -H "Content-Type: application/json" \
-  -d '{
-    "camera_id": "gate1",
-    "rtsp_url": "rtsp://username:password@192.168.1.100:554/"
-  }'
-```
-
-### Example: Single Image Predict
-
-```bash
-curl -X POST http://localhost:8000/predict \
-  -F "file=@/path/to/frame.jpg"
+  -d '{"image": "<base64-encoded-frame>"}'
 ```
 
 **Response:**
@@ -101,8 +89,7 @@ curl -X POST http://localhost:8000/predict \
 {
   "plate_text": "12ب34567",
   "confidence": 0.94,
-  "bbox": [120, 340, 280, 390],
-  "timestamp": "2024-01-15T09:32:11"
+  "bbox": [120, 340, 280, 390]
 }
 ```
 
