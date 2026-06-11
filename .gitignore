@@ -37,3 +37,7 @@ sample/
 .idea/
 *.swp
 .DS_Store
+
+# weights
+.pt
+.ckpt
